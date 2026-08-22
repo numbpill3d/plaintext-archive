@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A minimal black and red plaintext archive.">
+  <title>RED//ARCHIVE</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --black: #050505;
+      --panel: #0a0a0a;
+      --red: #ff2b2b;
+      --red-dim: #8f1717;
+      --text: #e8dddd;
+      --muted: #ad9494;
+      --line: #4a1818;
+      --max: 1060px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--black);
+      color: var(--text);
+      font: 15px/1.65 "Courier New", Courier, monospace;
+    }
+
+    ::selection {
+      color: var(--black);
+      background: var(--red);
+    }
+
+    a { color: var(--red); }
+
+    a:hover { color: #fff; }
+
+    button,
+    input { font: inherit; }
+
+    :focus-visible {
+      outline: 1px solid var(--red);
+      outline-offset: 3px;
+    }
+
+    .shell {
+      width: min(calc(100% - 32px), var(--max));
+      margin: 0 auto;
+    }
+
+    .topline {
+      height: 4px;
+      background: var(--red);
+    }
+
+    header {
+      padding: 58px 0 34px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .eyebrow,
+    .meta,
+    .status,
+    .tag {
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      font-size: 12px;
+    }
+
+    h1 {
+      margin: 6px 0 12px;
+      color: var(--red);
+      font-size: clamp(38px, 8vw, 78px);
+      line-height: .95;
+      letter-spacing: -.07em;
+      font-weight: 700;
+    }
+
+    .intro {
+      max-width: 680px;
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: end;
+      padding: 22px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    label {
+      display: block;
+      color: var(--red);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    input[type="search"] {
+      width: 100%;
+      margin-top: 6px;
+      padding: 11px 12px;
+      border: 1px solid var(--red-dim);
+      border-radius: 0;
+      color: var(--text);
+      background: transparent;
+      caret-color: var(--red);
+    }
+
+    input[type="search"]::placeholder { color: #695858; }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .filter {
+      min-height: 42px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 0;
+      color: var(--muted);
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .filter:hover,
+    .filter[aria-pressed="true"] {
+      border-color: var(--red);
+      color: var(--black);
+      background: var(--red);
+    }
+
+    .archive-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 32px 0 12px;
+    }
+
+    .archive-head h2 {
+      margin: 0;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 400;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .entries { border-top: 1px solid var(--red-dim); }
+
+    article {
+      display: grid;
+      grid-template-columns: 130px minmax(0, 1fr) 120px;
+      gap: 24px;
+      padding: 27px 0 30px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    article[hidden] { display: none; }
+
+    .entry-index {
+      color: var(--red);
+      font-size: 13px;
+    }
+
+    h3 {
+      margin: -3px 0 8px;
+      font-size: clamp(18px, 3vw, 25px);
+      line-height: 1.25;
+      font-weight: 700;
+    }
+
+    h3 a {
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    h3 a::before {
+      content: "> ";
+      color: var(--red);
+    }
+
+    h3 a:hover { color: var(--red); }
+
+    .excerpt {
+      max-width: 680px;
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .entry-side {
+      text-align: right;
+    }
+
+    .tag {
+      display: inline-block;
+      color: var(--red);
+    }
+
+    .empty {
+      display: none;
+      padding: 64px 0;
+      color: var(--muted);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .empty.visible { display: block; }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 32px 0 48px;
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+    }
+
+    .blink {
+      color: var(--red);
+      animation: blink 1.1s steps(1) infinite;
+    }
+
+    @keyframes blink { 50% { opacity: 0; } }
+
+    @media (max-width: 760px) {
+      header { padding-top: 40px; }
+      .controls { grid-template-columns: 1fr; }
+      article { grid-template-columns: 72px minmax(0, 1fr); gap: 16px; }
+      .entry-side { grid-column: 2; text-align: left; }
+      footer { flex-direction: column; }
+    }
+
+    @media (max-width: 460px) {
+      .shell { width: min(calc(100% - 22px), var(--max)); }
+      article { grid-template-columns: 1fr; gap: 6px; }
+      .entry-side { grid-column: 1; }
+      .archive-head { flex-direction: column; gap: 4px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      .blink { animation: none; }
+    }
+  </style>
+</head>
+<body id="top">
+  <div class="topline" aria-hidden="true"></div>
+
+  <header>
+    <div class="shell">
+      <div class="eyebrow">Independent plaintext index / established 2026</div>
+      <h1>RED//ARCHIVE</h1>
+      <p class="intro">A quiet repository for notes, fragments, documents, and records. No feeds. No algorithms. Just text preserved in sequence.</p>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="controls" aria-label="Archive controls">
+      <label>
+        Search records
+        <input id="search" type="search" placeholder="type to filter..." autocomplete="off">
+      </label>
+
+      <div class="filters" aria-label="Filter by category">
+        <button class="filter" type="button" data-filter="all" aria-pressed="true">ALL</button>
+        <button class="filter" type="button" data-filter="note" aria-pressed="false">NOTES</button>
+        <button class="filter" type="button" data-filter="record" aria-pressed="false">RECORDS</button>
+        <button class="filter" type="button" data-filter="fragment" aria-pressed="false">FRAGMENTS</button>
+      </div>
+    </section>
+
+    <div class="archive-head">
+      <h2>Index / newest first</h2>
+      <div class="status" aria-live="polite"><span id="count">6</span> records visible</div>
+    </div>
+
+    <section class="entries" id="entries" aria-label="Archive entries">
+      <!-- Duplicate an <article> block to add another archive entry. -->
+      <article id="record-006" data-category="record" data-search="transmission six redacted field recording signal winter">
+        <div class="entry-index">[006]</div>
+        <div>
+          <h3><a href="#record-006">Transmission Six</a></h3>
+          <p class="excerpt">Recovered field recording. Signal unstable after 02:14. Remaining material has been transcribed without correction.</p>
+        </div>
+        <div class="entry-side"><time class="meta" datetime="2026-08-14">2026.08.14</time><br><span class="tag">#record</span></div>
+      </article>
+
+      <article id="record-005" data-category="note" data-search="notes architecture empty room concrete archive memory">
+        <div class="entry-index">[005]</div>
+        <div>
+          <h3><a href="#record-005">Notes on an Empty Room</a></h3>
+          <p class="excerpt">The archive is not a monument. It is a room with enough space for the material to remain unresolved.</p>
+        </div>
+        <div class="entry-side"><time class="meta" datetime="2026-07-29">2026.07.29</time><br><span class="tag">#note</span></div>
+      </article>
+
+      <article id="record-004" data-category="fragment" data-search="inventory unnamed objects fragment metal glass wire paper">
+        <div class="entry-index">[004]</div>
+        <div>
+          <h3><a href="#record-004">Inventory of Unnamed Objects</a></h3>
+          <p class="excerpt">01: oxidized metal. 02: smoked glass. 03: black wire, cut at both ends. 04: paper bearing no mark.</p>
+        </div>
+        <div class="entry-side"><time class="meta" datetime="2026-07-03">2026.07.03</time><br><span class="tag">#fragment</span></div>
+      </article>
+
+      <article id="record-003" data-category="record" data-search="night protocol record access terminal sequence">
+        <div class="entry-index">[003]</div>
+        <div>
+          <h3><a href="#record-003">Night Protocol</a></h3>
+          <p class="excerpt">Access sequence and terminal procedure for the hours between last contact and first light.</p>
+        </div>
+        <div class="entry-side"><time class="meta" datetime="2026-06-18">2026.06.18</time><br><span class="tag">#record</span></div>
+      </article>
+
+      <article id="record-002" data-category="note" data-search="against deletion note preservation memory storage">
+        <div class="entry-index">[002]</div>
+        <div>
+          <h3><a href="#record-002">Against Deletion</a></h3>
+          <p class="excerpt">Storage is cheap. Context is not. Keep the failed drafts, the uncertain dates, and the contradictions.</p>
+        </div>
+        <div class="entry-side"><time class="meta" datetime="2026-05-30">2026.05.30</time><br><span class="tag">#note</span></div>
+      </article>
+
+      <article id="record-001" data-category="fragment" data-search="first entry fragment archive beginning origin">
+        <div class="entry-index">[001]</div>
+        <div>
+          <h3><a href="#record-001">First Entry</a></h3>
+          <p class="excerpt">Begin with the smallest possible unit: a date, a title, a line of text. Everything else can arrive later.</p>
+        </div>
+        <div class="entry-side"><time class="meta" datetime="2026-05-01">2026.05.01</time><br><span class="tag">#fragment</span></div>
+      </article>
+    </section>
+
+    <p class="empty" id="empty">NO MATCHING RECORDS FOUND<span class="blink">_</span></p>
+  </main>
+
+  <footer class="shell">
+    <span>RED//ARCHIVE — plaintext survives</span>
+    <a href="#top" aria-label="Return to the top of the page">[ return to top ]</a>
+  </footer>
+
+  <script>
+    const search = document.querySelector('#search');
+    const entries = [...document.querySelectorAll('article[data-category]')];
+    const filters = [...document.querySelectorAll('.filter')];
+    const count = document.querySelector('#count');
+    const empty = document.querySelector('#empty');
+    let activeFilter = 'all';
+
+    function updateArchive() {
+      const query = search.value.trim().toLowerCase();
+      let visible = 0;
+
+      entries.forEach((entry) => {
+        const matchesFilter = activeFilter === 'all' || entry.dataset.category === activeFilter;
+        const searchable = `${entry.dataset.search} ${entry.textContent}`.toLowerCase();
+        const matchesSearch = !query || searchable.includes(query);
+        const show = matchesFilter && matchesSearch;
+        entry.hidden = !show;
+        if (show) visible += 1;
+      });
+
+      count.textContent = visible;
+      empty.classList.toggle('visible', visible === 0);
+    }
+
+    search.addEventListener('input', updateArchive);
+
+    filters.forEach((button) => {
+      button.addEventListener('click', () => {
+        activeFilter = button.dataset.filter;
+        filters.forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
+        updateArchive();
+      });
+    });
+  </script>
+</body>
+</html>
