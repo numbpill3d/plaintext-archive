@@ -2,6 +2,9 @@
 
 A dependency-free collection of plaintext/BBS-inspired web interface experiments. The pages recreate a small dial-up archive using self-contained HTML and CSS, with no build system or external runtime dependencies.
 
+![Plaintext Archive live interface](docs/screenshots/plaintext-archive.png)
+
+
 ## Variants
 
 - `index.html` — current Red Archive BBS presentation
